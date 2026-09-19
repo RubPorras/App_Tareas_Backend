@@ -1,0 +1,25 @@
+POST http://localhost:5282/api/auth/login
+Content-Type: application/json
+
+{
+  "usernameoremail": "Danie_Porras",
+  "password": "<74677422Ka>"
+}
+
+###
+POST http://localhost:5282/api/auth/login
+Content-Type: application/json
+
+{
+  "usernameoremail": "Rub_Porras",
+  "password": "2FtVE12MLrf3uJLBIIG7EHQ1/KG4ZkAfDWqn2QCXo4o="
+}
+
+###
+POST http://localhost:5282/api/auth/login
+Content-Type: application/json
+
+{
+  "usernameoremail": "adalia",
+  "password": "<74677422Ka>"
+}

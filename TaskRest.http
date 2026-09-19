@@ -1,0 +1,38 @@
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMDAyIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiVXNlciIsImp0aSI6ImFjNWYxMDkxLTMxMTMtNGZiYS05MjUwLWYwMWZiYzM3NThhYyIsImV4cCI6MTc4ODAzMDk5NSwiaXNzIjoiVGFza0FwaSIsImF1ZCI6IlRhc2tBcGlDbGllbnQifQ.NkUKJtmYiqKVJBHy4sGh8X_R7LEIoP4SmkanA__1sN8
+@admintoken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMDA0IiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW4iLCJqdGkiOiI0NWU0OWJlNy1kNzBlLTQ5ZWItODkyNy1iZjYwMTIwODYzYjYiLCJleHAiOjE3ODg5MDUxOTIsImlzcyI6IlRhc2tBcGkiLCJhdWQiOiJUYXNrQXBpQ2xpZW50In0.toztX1_DOBF-JC0-Dn2Jv_N1YTSjBDyzLAeJPMFpkOA
+
+
+GET http://localhost:5282/api/tasks/13
+Authorization: Bearer {{admintoken}}
+
+### 
+POST http://localhost:5282/api/tasks
+Content-Type: application/json
+Authorization: Bearer {{admintoken}}
+
+{
+  "title": "Segunda Tarea de adalia",
+  "description": "tarea de pruebas 2.",
+  "dueDate": "2024-07-01T12:00:00Z"
+}
+
+###
+GET http://localhost:5282/api/tasks?page=0&pageSize=999999
+Authorization: Bearer {{admintoken}}
+
+###
+PUT http://localhost:5282/api/tasks/1
+Content-Type: application/json
+Authorization: Bearer {{admintoken}}
+
+{
+  "title": "Tarea de daniel",
+  "description": "El administrador ha modificado la tarea de daniel.",
+  "dueDate": "2024-07-01T12:00:00Z",
+  "isCompleted": true,
+  "userId": 1005
+}
+
+###
+DELETE http://localhost:5282/api/tasks/11
+Authorization: Bearer {{admintoken}}
