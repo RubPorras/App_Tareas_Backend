@@ -1,4 +1,5 @@
 using Backend.Data;
+using Backend.DTO.Task;
 using Backend.DTO.User;
 using Backend.Model;
 using Backend.Services;
@@ -20,24 +21,36 @@ namespace Backend.Service.UserService
             _passwordService = passwordService;
         }
         // Obtiene todos los usuarios.
-        public async Task<IEnumerable<GetUserDto>> GetAllAsync()
+        public async Task<PagedResult<GetUserDto>> GetAllAsync(PaginationParams pagination)
         {
-        // Solo seleccionamos los campos necesarios para el DTO.
-        // De esta manera nunca exponemos PasswordHash.
-            return await _context.Users
-            .AsNoTracking()
-            .Select(user => new GetUserDto
-            {
-                Id = user.Id,
-                Username = user.Username,
-                Email = user.Email,
-                Role = user.Role.ToString(),
-                IsActive = user.IsActive,
-                CreatedAt = user.CreatedAt,
-                UpdatedAt = user.UpdatedAt
-            })
+            var query = _context.Users
+                .AsNoTracking()
+                .Select(user => new GetUserDto
+                {
+                    Id = user.Id,
+                    Username = user.Username,
+                    Email = user.Email,
+                    Role = user.Role.ToString(),
+                    IsActive = user.IsActive,
+                    CreatedAt = user.CreatedAt,
+                    UpdatedAt = user.UpdatedAt
+                });
+
+            var totalCount = await query.CountAsync();
+
+            var users = await query
+                .Skip(pagination.Skip)
+                .Take(pagination.PageSize)
                 .ToListAsync();
-            }
+
+            return new PagedResult<GetUserDto>
+            {
+                Items = users,
+                Page = pagination.Page,
+                PageSize = pagination.PageSize,
+                TotalCount = totalCount
+            };
+        }
         // Obtiene un usuario mediante su identificador.
         public async Task<GetUserDto?> GetByIdAsync(int id)
         {
