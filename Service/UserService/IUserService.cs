@@ -1,3 +1,4 @@
+using Backend.DTO.Task;
 using Backend.DTO.User;
 
 namespace Backend.Service.UserService
@@ -6,7 +7,7 @@ namespace Backend.Service.UserService
     public interface IUserService
     {
         // Obtiene todos los usuarios.
-        Task<IEnumerable<GetUserDto>> GetAllAsync();
+        Task<PagedResult<GetUserDto>> GetAllAsync(PaginationParams pagination);
         // Obtiene un usuario mediante su identificador.
         Task<GetUserDto?> GetByIdAsync(int id);
         // Crea un nuevo usuario.
