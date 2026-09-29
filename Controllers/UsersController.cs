@@ -3,6 +3,7 @@ using Backend.Service.UserService;
 using Microsoft.AspNetCore.Mvc;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
+using Backend.DTO.Task;
 
 namespace Backend.Controllers;
 
@@ -36,11 +37,33 @@ public sealed class UsersController : ControllerBase
     [HttpGet]
     [ProducesResponseType(
         StatusCodes.Status200OK)]
-    public async Task<ActionResult<IEnumerable<GetUserDto>>> GetAll()
+    public async Task<ActionResult<PagedResult<GetUserDto>>> GetAll(
+    [FromQuery] PaginationParams pagination)
     {
-        var users = await _userService.GetAllAsync();
+        var normalizedPagination = NormalizePagination(pagination);
+
+        var users = await _userService.GetAllAsync(
+            normalizedPagination);
 
         return Ok(users);
+    }
+
+
+    private static PaginationParams NormalizePagination(
+        PaginationParams pagination)
+    {
+        var page = Math.Max(pagination.Page, 1);
+
+        var pageSize = Math.Clamp(
+            pagination.PageSize,
+            1,
+            PaginationParams.MaxPageSize);
+
+        return new PaginationParams
+        {
+            Page = page,
+            PageSize = pageSize
+        };
     }
 
     /// <summary>
