@@ -167,3 +167,4 @@ C:\Users\phhru\OneDrive\Escritorio\Final_Proyect\backend\bin\Debug\net10.0\Fluen
 C:\Users\phhru\OneDrive\Escritorio\Final_Proyect\backend\bin\Debug\net10.0\FluentValidation.DependencyInjectionExtensions.dll
 C:\Users\phhru\OneDrive\Escritorio\Final_Proyect\backend\bin\Debug\net10.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 C:\Users\phhru\OneDrive\Escritorio\Final_Proyect\backend\bin\Debug\net10.0\Microsoft.Bcl.Cryptography.dll
+C:\Users\phhru\OneDrive\Escritorio\Final_Proyect\Backend\obj\Debug\net10.0\Backend.sourcelink.json
