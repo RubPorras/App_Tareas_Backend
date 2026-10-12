@@ -7,14 +7,14 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 # 1. Copiar solo el .csproj y restaurar (aprovecha el caché de capas)
-COPY Backend.Api.csproj .
-RUN dotnet restore Backend.Api.csproj
+COPY Backend.csproj .
+RUN dotnet restore Backend.csproj
 
 # 2. Copiar el resto del código y publicar
 COPY . .
-RUN dotnet publish Backend.Api.csproj -c Release -o /app/publish --no-restore
+RUN dotnet publish Backend.csproj -c Release -o /app/publish --no-restore
 
 FROM runtime AS final
 WORKDIR /app
 COPY --from=build /app/publish .
-ENTRYPOINT ["dotnet", "Backend.Api.dll"]
+ENTRYPOINT ["dotnet", "Backend.dll"]
