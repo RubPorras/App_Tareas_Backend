@@ -94,6 +94,12 @@ using (var scope = app.Services.CreateScope())
     await adminSeeder.SeedAsync();
 }
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
+
 // Request pipeline
 if (app.Environment.IsDevelopment())
 {
