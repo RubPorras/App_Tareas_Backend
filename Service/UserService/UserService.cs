@@ -39,9 +39,11 @@ namespace Backend.Service.UserService
             var totalCount = await query.CountAsync();
 
             var users = await query
+                .OrderBy(user => user.Id)
                 .Skip(pagination.Skip)
                 .Take(pagination.PageSize)
                 .ToListAsync();
+                
 
             return new PagedResult<GetUserDto>
             {
@@ -77,7 +79,7 @@ namespace Backend.Service.UserService
         {
             // Normalizamos los datos antes de realizar cualquier operación
             // para evitar registros inconsistentes.
-            var username = request.Username.Trim();
+            var username = request.Username.Trim().ToLowerInvariant();
             var email = request.Email.Trim().ToLowerInvariant();
 
             // Comprobamos si ya existe un usuario con el mismo Username
@@ -146,7 +148,7 @@ namespace Backend.Service.UserService
             }
 
             // Normalizamos los datos antes de comprobar duplicados y actualizar.
-            var username = request.Username.Trim();
+            var username = request.Username.Trim().ToLowerInvariant();
             var email = request.Email.Trim().ToLowerInvariant();
 
             // Comprobamos si otro usuario ya utiliza el Username o Email.

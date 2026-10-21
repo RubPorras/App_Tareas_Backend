@@ -41,10 +41,12 @@ namespace Backend.Service.AuthService
 
             // Buscamos por Username o Email.
             // No utilizamos PasswordHash en la consulta.
+            var identifier = request.UsernameOrEmail.Trim().ToLowerInvariant();
+
             var user = await _context.Users
-                .FirstOrDefaultAsync(user =>
-                    user.Username == usernameOrEmail ||
-                    user.Email == usernameOrEmail.ToLower());
+                .FirstOrDefaultAsync(u =>
+                    u.Username == identifier ||
+                    u.Email == identifier);
 
             // No revelamos si el usuario existe.
             if (user is null)

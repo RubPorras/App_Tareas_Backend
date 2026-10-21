@@ -13,7 +13,7 @@ using Backend.Validators.User;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(
+    options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddControllers();
@@ -85,6 +85,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
+
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
+
 // Seed the initial administrator.
 using (var scope = app.Services.CreateScope())
 {
@@ -92,12 +100,6 @@ using (var scope = app.Services.CreateScope())
         .GetRequiredService<AdminSeeder>();
 
     await adminSeeder.SeedAsync();
-}
-
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
 }
 
 // Request pipeline

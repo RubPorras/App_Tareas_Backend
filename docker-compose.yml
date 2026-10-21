@@ -1,44 +1,37 @@
 services:
   db:
-    image: mcr.microsoft.com/mssql/server:2022-latest
+    image: postgres:16
     environment:
-      ACCEPT_EULA: "Y"
-      MSSQL_PID: Developer
-      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:?Define MSSQL_SA_PASSWORD en tu archivo .env}"
+      POSTGRES_USER: Rub_Porras
+      POSTGRES_PASSWORD: 74677422Ka
+      POSTGRES_DB: TaskAPI
     ports:
-      - "1433:1433"
+      - "5433:5432"
     volumes:
-      - sqlserver_data:/var/opt/mssql
+      - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test:
-        - CMD
-        - /opt/mssql-tools18/bin/sqlcmd
-        - -S
-        - localhost
-        - -U
-        - sa
-        - -P
-        - "${MSSQL_SA_PASSWORD:?Define MSSQL_SA_PASSWORD en tu archivo .env}"
-        - -C
-        - -Q
-        - "SELECT 1"
-      interval: 10s
-      timeout: 5s
+      test: ["CMD-SHELL", "pg_isready -U Rub_Porras -d TaskAPI"]
+      interval: 5s
+      timeout: 3s
       retries: 10
-      start_period: 30s
+      start_period: 10s
 
   api:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: ./
     ports:
       - "8080:8080"
     environment:
-      ASPNETCORE_URLS: "http://+:8080"
-      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=TaskApiDb;User Id=sa;Password=${MSSQL_SA_PASSWORD:?Define MSSQL_SA_PASSWORD en tu archivo .env};Encrypt=True;TrustServerCertificate=True"
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=TaskAPI;Username=Rub_Porras;Password=74677422Ka"
+      JwtSettings__Secret: "0df44a3d-7f4d-4783-96d0-69505650946f"
+      JwtSettings__Issuer: "RestApi"
+      JwtSettings__Audience: "Rub_Porras"
+      AdminBootstrap__Username: "Rub_Porras"
+      AdminBootstrap__Email: "phhruben@hotmail.com"
+      AdminBootstrap__Password: "2FtVE12MLrf3uJLBIIG7EHQ1/KG4ZkAfDWqn2QCXo4o=!"
     depends_on:
       db:
         condition: service_healthy
 
 volumes:
-  sqlserver_data:
+  pgdata:
