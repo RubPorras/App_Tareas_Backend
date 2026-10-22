@@ -20,7 +20,12 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 // Configuration
-builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+builder.Services.AddOptions<JwtSettings>()
+    .Bind(builder.Configuration.GetSection("JwtSettings"))
+    .Validate(s => !string.IsNullOrWhiteSpace(s.Secret) && s.Secret.Length >= 32,
+        "JwtSettings:Secret debe tener al menos 32 caracteres.")
+    .ValidateOnStart();
+    
 builder.Services.Configure<AdminBootstrapSettings>(
     builder.Configuration.GetSection("AdminBootstrap"));
 
