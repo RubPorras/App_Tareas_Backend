@@ -2,15 +2,15 @@ services:
   db:
     image: postgres:16
     environment:
-      POSTGRES_USER: Rub_Porras
-      POSTGRES_PASSWORD: 74677422Ka
-      POSTGRES_DB: TaskAPI
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U Rub_Porras -d TaskAPI"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -21,14 +21,14 @@ services:
     ports:
       - "8080:8080"
     environment:
-      ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=TaskAPI;Username=Rub_Porras;Password=74677422Ka"
-      JwtSettings__Secret: "0df44a3d-7f4d-4783-96d0-69505650946f"
-      JwtSettings__Issuer: "RestApi"
-      JwtSettings__Audience: "Rub_Porras"
-      AdminBootstrap__Username: "Rub_Porras"
-      AdminBootstrap__Email: "phhruben@hotmail.com"
-      AdminBootstrap__Password: "2FtVE12MLrf3uJLBIIG7EHQ1/KG4ZkAfDWqn2QCXo4o=!"
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+      JwtSettings__Secret: ${JWT_SECRET}
+      JwtSettings__Issuer: ${JWT_ISSUER:-RestApi}
+      JwtSettings__Audience: ${JWT_AUDIENCE}
+      AdminBootstrap__Username: ${ADMIN_USERNAME}
+      AdminBootstrap__Email: ${ADMIN_EMAIL}
+      AdminBootstrap__Password: ${ADMIN_PASSWORD}
     depends_on:
       db:
         condition: service_healthy
