@@ -1,20 +1,24 @@
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+
+# 1. Restaurar solo con el .csproj (aprovecha la caché de capas)
+COPY Backend.csproj .
+RUN dotnet restore Backend.csproj
+
+# 2. Copiar el resto y publicar
+COPY . .
+RUN dotnet publish Backend.csproj -c Release -o /app/publish --no-restore
+
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 ENV ASPNETCORE_URLS=http://+:8080
 EXPOSE 8080
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
-WORKDIR /src
+# curl para el healthcheck (como root, antes de cambiar de usuario)
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
 
-# 1. Copiar solo el .csproj y restaurar (aprovecha el caché de capas)
-COPY Backend.csproj .
-RUN dotnet restore Backend.csproj
-
-# 2. Copiar el resto del código y publicar
-COPY . .
-RUN dotnet publish Backend.csproj -c Release -o /app/publish --no-restore
-
-FROM runtime AS final
-WORKDIR /app
 COPY --from=build /app/publish .
+USER $APP_UID
 ENTRYPOINT ["dotnet", "Backend.dll"]
