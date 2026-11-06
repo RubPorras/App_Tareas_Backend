@@ -49,9 +49,6 @@ builder.Services.AddOptions<JwtSettings>()
 builder.Services.Configure<AdminBootstrapSettings>(
     builder.Configuration.GetSection("AdminBootstrap"));
 
-builder.Services.AddHealthChecks()
-    .AddDbContextCheck<AppDbContext>("database");
-
 // Application services
 builder.Services.AddValidatorsFromAssemblyContaining<CreateUserDtoValidator>();
 builder.Services.AddScoped<AdminSeeder>();
@@ -123,6 +120,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseRouting();
 app.UseCors("Frontend");
 app.UseAuthentication();
 app.UseAuthorization();
