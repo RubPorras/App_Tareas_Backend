@@ -9,6 +9,7 @@ using Backend.Service.AuthService;
 using Backend.Service.UserService;
 using Backend.Services;
 using Backend.Validators.User;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,10 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
+
+builder.Services.AddHealthChecks()
+    .AddCheck("self", () => HealthCheckResult.Healthy(), tags: ["live"])
+    .AddDbContextCheck<AppDbContext>("database", tags: ["ready"]);
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
@@ -121,7 +126,8 @@ app.UseHttpsRedirection();
 app.UseCors("Frontend");
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapHealthChecks("/health");
+app.MapHealthChecks("/health/live", new() { Predicate = r => r.Tags.Contains("live") });
+app.MapHealthChecks("/health/ready", new() { Predicate = r => r.Tags.Contains("ready") });
 
 app.MapControllers();
 
