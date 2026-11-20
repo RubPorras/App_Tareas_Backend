@@ -9,18 +9,46 @@ using Backend.Service.AuthService;
 using Backend.Service.UserService;
 using Backend.Services;
 using Backend.Validators.User;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException(
+        "Falta ConnectionStrings:DefaultConnection.");
+
+var corsOptions = builder.Configuration
+    .GetSection("Cors")
+    .Get<CorsOptions>() ?? new CorsOptions();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Frontend", policy =>
+        policy.WithOrigins(corsOptions.AllowedOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod());
+});
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(connectionString));
+
+builder.Services.AddHealthChecks()
+    .AddCheck("self", () => HealthCheckResult.Healthy(), tags: ["live"])
+    .AddDbContextCheck<AppDbContext>("database", tags: ["ready"]);
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 // Configuration
-builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+builder.Services.AddOptions<JwtSettings>()
+    .Bind(builder.Configuration.GetSection("JwtSettings"))
+    .Validate(s => !string.IsNullOrWhiteSpace(s.Secret) && s.Secret.Length >= 32,
+        "JwtSettings:Secret debe tener al menos 32 caracteres.")
+    .ValidateOnStart();
+    
 builder.Services.Configure<AdminBootstrapSettings>(
     builder.Configuration.GetSection("AdminBootstrap"));
 
@@ -31,21 +59,6 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPasswordService, PasswordService>();
 builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<IUserService, UserService>();
-
-// Authorization
-builder.Services.AddAuthorization();
-
-// Cross-origin requests
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("Frontend", policy =>
-    {
-        policy
-            .WithOrigins("http://localhost:5173")
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-    });
-});
 
 // Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -83,7 +96,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+// Authorization
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 
 // Seed the initial administrator.
 using (var scope = app.Services.CreateScope())
@@ -101,9 +123,12 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseRouting();
 app.UseCors("Frontend");
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapHealthChecks("/health/live", new() { Predicate = r => r.Tags.Contains("live") });
+app.MapHealthChecks("/health/ready", new() { Predicate = r => r.Tags.Contains("ready") });
 
 app.MapControllers();
 

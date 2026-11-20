@@ -50,7 +50,7 @@ public sealed class AdminSeeder
                 "La configuración AdminBootstrap está incompleta.");
         }
 
-        var username = _settings.Username.Trim();
+        var username = _settings.Username.Trim().ToLowerInvariant();
         var email = _settings.Email.Trim().ToLowerInvariant();
 
         // Evitamos crear el Admin si las credenciales configuradas
